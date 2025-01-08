@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "py-sp-api"
+version = "0.1.0"
+description = ""
+authors = ["Brian Peterson <brian.peterson@cloudshift.cc>"]
+readme = "README.md"
+packages = [{include = "py_sp_api", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic = "^2.10.4"
+
+
+[tool.poetry.group.dev.dependencies]
+openapi-generator-cli = "^7.10.0.post0"
+jupyter = "^1.1.1"
+backoff = "^2.2.1"
+pytest = "^8.3.4"
+python-dotenv = "^1.0.1"
+black = "^24.10.0"
+autoflake = "^2.3.1"
+flake8 = "^7.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = [ "tests" ]
+
+[tool.black]
+line-length = 120
+extend-exclude = '''
+^/src/py_sp_api/generated/
+'''

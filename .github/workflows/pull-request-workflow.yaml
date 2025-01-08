@@ -1,0 +1,81 @@
+name: Pull Request Workflow
+on:
+  - pull_request
+
+jobs:
+  setup:
+    name: Setup Environment
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+      - name: Install & configure poetry
+        run: |
+          python -m pip install poetry==1.4.2
+          python -m poetry config virtualenvs.in-project true
+      - name: Cache poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: ./.venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+      - name: Install poetry dependencies
+        run: |
+          python -m poetry install
+      - name: Upload workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: workspace
+          include-hidden-files: true
+          path: |
+            .
+            !.git
+            !.github
+            !.venv
+            !node_modules
+  verify:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        task: [lint, test]
+        include:
+          - task: lint
+            command: make lint
+          - task: test
+            command: make test
+    name: ${{ matrix.task }}
+    steps:
+      - name: Download workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: workspace
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+      - name: Install & configure poetry
+        run: |
+          python -m pip install poetry==1.4.2
+            python -m poetry config virtualenvs.in-project true
+      - name: Cache poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: ./.venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node_modules-
+      - name: Install dependencies
+        run: python -m poetry install
+      - name: Run ${{ matrix.task }}
+        run: python -m poetry run ${{ matrix.command }}
+        timeout-minutes: 5
