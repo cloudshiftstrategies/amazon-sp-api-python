@@ -6,7 +6,7 @@ This is a python version of ths Amazon Seller API
 We use the openapi generator <https://openapi-generator.tech/> to convert the amazon sp-api
 swagger api models <https://github.com/amzn/selling-partner-api-models.git> into a python package.
 
-This creates a requiests base API with pydantic types. Awesome!
+This creates a `requests` based API with `pydantic` types. Awesome!
 
 This project consists of tweaks I had to make to aws auth schemes to get things working
 with the openapi generator client, the generator script that creates the models and a
