@@ -12,10 +12,18 @@
   ([`0cbf9dc`](https://github.com/cloudshiftstrategies/py-sp-api/commit/0cbf9dc2ac7a8fcaf5823bf5f2f5913a39a32ff7))
 
 - **typo**: Forcing release
+  ([`ab13601`](https://github.com/cloudshiftstrategies/py-sp-api/commit/ab13601acf00ad2b68f911b49fb92c5b52bf6314))
+
+- **typo**: Forcing release
   ([`ea44a32`](https://github.com/cloudshiftstrategies/py-sp-api/commit/ea44a32d369bba6ab32f2626f112f6adc9d7ae9e))
 
 - **typo**: Forcing release
   ([`531a332`](https://github.com/cloudshiftstrategies/py-sp-api/commit/531a332c8b04b9f871d5354f0f86779122abb826))
+
+### Chores
+
+- **release**: Bump version to 0.1.0
+  ([`a1dcbd8`](https://github.com/cloudshiftstrategies/py-sp-api/commit/a1dcbd858085a810704262a419e8e5a8b0bab0ea))
 
 ### Features
 
