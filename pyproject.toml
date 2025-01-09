@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "amazon-sp-api-python"
-version = "0.1.0"
+version = "0.1.1"
 description = "Amazon SP-API Python Client"
 authors = ["Brian Peterson <brian.peterson@cloudshift.cc>"]
 homepage = "https://github.com/cloudshiftstrategies/py-sp-api"
