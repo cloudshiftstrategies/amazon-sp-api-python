@@ -19,7 +19,7 @@ little bit of documentation. Nothing fancy.
 
 ## Installation
 
-`pip install py-sp-api`
+`pip install amazon-sp-api-python`
 
 ## Usage
 
