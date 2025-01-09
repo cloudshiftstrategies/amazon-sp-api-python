@@ -1,4 +1,4 @@
-# py-sp-api
+# amazon-sp-api-python
 
 This is a python version of ths Amazon Seller API
 <https://developer-docs.amazon.com/sp-api/docs/>
