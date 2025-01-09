@@ -173,11 +173,12 @@ jobs:
       - name: Build and publish
         if: steps.release.outputs.released == 'true'
         run: |
-          # Download the workspace first since we need the updated pyproject.toml
-          - name: Download workspace
-            uses: actions/download-artifact@v4
-            with:
-              name: workspace
-          
           python -m poetry build
           python -m poetry publish
+
+      # Add the download workspace as a separate step before build and publish
+      - name: Download workspace
+        if: steps.release.outputs.released == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: workspace
