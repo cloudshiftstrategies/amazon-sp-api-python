@@ -1,6 +1,21 @@
 # py-sp-api
 
-<https://developer-docs.amazon.com/sp-api/docs/tutorial-automate-your-sp-api-calls-using-python-sdk>
+This is a python version of ths Amazon Seller API
+<https://developer-docs.amazon.com/sp-api/docs/>
+
+We use the openapi generator <https://openapi-generator.tech/> to convert the amazon sp-api
+swagger api models <https://github.com/amzn/selling-partner-api-models.git> into a python package.
+
+This creates a requiests base API with pydantic types. Awesome!
+
+This project consists of tweaks I had to make to aws auth schemes to get things working
+with the openapi generator client, the generator script that creates the models and a
+little bit of documentation. Nothing fancy.
+
+## Prerequisites
+
+- python 3.9+
+- amazon seller api credentials. See the docs <https://developer-docs.amazon.com/sp-api/docs/>
 
 ## Installation
 
@@ -53,11 +68,16 @@ test_get_pricing(asin="B0DP7GSWC8")
 
 ## Development
 
+This is a poetry project so do the normal `poetry install` type things to set up your environment. 
+
+We use a Makefile for build automation.
+
 - `make clean` removes the generated code
 - `make generate` generates the schemas
 - `make test` runs unit tests
+- `make lint-fix` fixes linting issues and checks compliance with linting standards
 
-### Structure
+### Project Structure
 
 ```text
 .
@@ -70,6 +90,7 @@ test_get_pricing(asin="B0DP7GSWC8")
 ├── selling-partner-api-models - git submodule from <https://github.com/amzn/selling-partner-api-models.git>
 ├── scripts
 │   └── generate_schemas.py - script to generate api
+├── tests - unit tests. (just enough to make sure things generated without error)
 └── src
     └── py_sp_api
         ├── auth - copied from selling-partner-api-models/clients/sellingpartner-api-aa-python/auth

@@ -11,22 +11,29 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for semantic-release
+
       - name: Set up python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
+
       - name: Install & configure poetry
         run: |
           python -m pip install poetry==1.7.1
           python -m poetry config virtualenvs.in-project true
+
       - name: Cache poetry virtualenv
         uses: actions/cache@v4
         with:
           path: ./.venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+
       - name: Install poetry dependencies
         run: |
           python -m poetry install
+
       - name: Upload workspace
         uses: actions/upload-artifact@v4
         with:
@@ -38,44 +45,98 @@ jobs:
             !.github
             !.venv
             !node_modules
+
   verify:
     needs: setup
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        task: [lint, test]
+        task: [lint]
         include:
           - task: lint
             command: make lint
-          - task: test
-            command: make test
     name: ${{ matrix.task }}
     steps:
       - name: Download workspace
         uses: actions/download-artifact@v4
         with:
           name: workspace
+
       - name: Set up python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
+
       - name: Install & configure poetry
         run: |
           python -m pip install poetry==1.7.1
           python -m poetry config virtualenvs.in-project true
+
       - name: Cache poetry virtualenv
         uses: actions/cache@v4
         with:
           path: ./.venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node_modules-
+
       - name: Install dependencies
         run: python -m poetry install
+
       - name: Run ${{ matrix.task }}
         run: python -m poetry run ${{ matrix.command }}
         timeout-minutes: 5
+
+  test:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+    name: Test Python ${{ matrix.python-version }}
+    steps:
+      - name: Download workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: workspace
+
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install & configure poetry
+        run: |
+          python -m pip install poetry==1.7.1
+          python -m poetry config virtualenvs.in-project true
+
+      - name: Install dependencies
+        run: python -m poetry install
+
+      - name: Run tests
+        run: python -m poetry run make test
+        timeout-minutes: 5
+
+  semantic-release-dry-run:
+    needs: setup
+    runs-on: ubuntu-latest
+    name: Semantic Release Dry Run
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for semantic-release to access git history
+          ref: ${{ github.head_ref }}  # This checks out the PR source branch
+
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install semantic-release
+        run: |
+          python -m pip install python-semantic-release==9.15.1
+
+      - name: Dry Run Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          semantic-release --noop version
