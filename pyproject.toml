@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "py-sp-api"
 version = "0.1.0"
-description = ""
+description = "Amazon SP-API Python Client"
 authors = ["Brian Peterson <brian.peterson@cloudshift.cc>"]
 readme = "README.md"
 packages = [{include = "py_sp_api", from = "src"}]
@@ -30,6 +30,4 @@ testpaths = [ "tests" ]
 
 [tool.black]
 line-length = 120
-extend-exclude = '''
-^/src/py_sp_api/generated/
-'''
+extend-exclude = "(src/py_sp_api/generated|selling-partner-api-models)"
