@@ -1,6 +1,6 @@
 # amazon-sp-api-python
 
-This is a python version of ths Amazon Seller API
+This is a python version of the Amazon Seller API
 <https://developer-docs.amazon.com/sp-api/docs/>
 
 We use the openapi generator <https://openapi-generator.tech/> to convert the amazon sp-api
@@ -35,7 +35,7 @@ from py_sp_api import SPAPIConfig
 
 
 def test_get_pricing(asin: str, marketplace_id="ATVPDKIKX0DER"):
-    # demonstrates a grantful "refresh_token" request
+    # demonstrates a grantful "refresh_token" request (the default)
     spapi_config = SPAPIConfig(
         client_id=os.getenv("SPAPI_CLIENT_ID"),
         client_secret=os.getenv("SPAPI_CLIENT_SECRET"),
@@ -48,7 +48,7 @@ def test_get_pricing(asin: str, marketplace_id="ATVPDKIKX0DER"):
 
 
 def test_notifications():
-    # demomonstrates a grantless request
+    # demomonstrates a grantless request (required for some operations like creating a notification destination)
     grantless_config = SPAPIConfig(
         client_id=os.getenv("SPAPI_CLIENT_ID"),
         client_secret=os.getenv("SPAPI_CLIENT_SECRET"),
