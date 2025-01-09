@@ -8,10 +8,10 @@ generate: clean
 	python scripts/generate_schemas.py
 
 test:
-	pytest
+	python -m pytest
 
 lint:
-	flake8 --statistics
+	python -m flake8 --statistics
 
 fix:
 	black --line-length 120 .

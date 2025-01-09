@@ -25,19 +25,19 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
-      
-      - name: Install & configure poetry
-        run: |
-          python -m pip install poetry==1.7.1
-          python -m poetry config virtualenvs.in-project true
+
+      - name: Configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.7.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
       
       - name: Cache poetry virtualenv
         uses: actions/cache@v4
         with:
           path: ./.venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-venv-
       
       - name: Install poetry dependencies
         run: |
@@ -52,7 +52,6 @@ jobs:
             .
             !.git
             !.github
-            !.venv
             !node_modules
   verify:
     needs: setup
@@ -69,30 +68,28 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: workspace
-      
+
       - name: Set up python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.11
-      
-      - name: Install & configure poetry
-        run: |
-          python -m pip install poetry==1.7.1
-          python -m poetry config virtualenvs.in-project true
-      
-      - name: Cache poetry virtualenv
+
+      - name: Configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.7.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Cache virtualenv
         uses: actions/cache@v4
         with:
           path: ./.venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-venv-
-      
-      - name: Install dependencies
-        run: python -m poetry install
-      
+
       - name: Run ${{ matrix.task }}
-        run: python -m poetry run ${{ matrix.command }}
+        run: |
+          poetry run ${{ matrix.command }}
 
   test:
     needs: setup
@@ -112,13 +109,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install & configure poetry
-        run: |
-          python -m pip install poetry==1.7.1
-          python -m poetry config virtualenvs.in-project true
+      - name: Configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.7.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
-      - name: Install dependencies
-        run: python -m poetry install
+      - name: Cache virtualenv
+        uses: actions/cache@v4
+        with:
+          path: ./.venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
 
       - name: Run tests
         run: python -m poetry run make test
@@ -159,11 +161,13 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Install poetry
+      - name: Configure Poetry
         if: steps.release.outputs.released == 'true'
-        run: |
-          python -m pip install poetry==1.7.1
-          python -m poetry config virtualenvs.in-project true
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.7.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
       - name: Configure poetry credentials
         if: steps.release.outputs.released == 'true'
