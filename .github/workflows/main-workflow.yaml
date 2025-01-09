@@ -52,7 +52,8 @@ jobs:
             .
             !.git
             !.github
-            !.venv/**/!(*.py)
+            !.venv
+            !node_modules
   verify:
     needs: setup
     runs-on: ubuntu-latest
@@ -174,14 +175,3 @@ jobs:
         run: |
           python -m poetry build
           python -m poetry publish
-
-      - name: Upload workspace
-        uses: actions/upload-artifact@v4
-        with:
-          name: workspace
-          include-hidden-files: true
-          path: |
-            .
-            !.git
-            !.github
-            !.venv/**/!(*.py)
