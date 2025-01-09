@@ -1,0 +1,138 @@
+name: Main Workflow
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  setup:
+    name: Setup Environment
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      
+      - name: Install & configure poetry
+        run: |
+          python -m pip install poetry==1.7.1
+          python -m poetry config virtualenvs.in-project true
+      
+      - name: Cache poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: ./.venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      
+      - name: Install poetry dependencies
+        run: |
+          python -m poetry install
+      
+      - name: Upload workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: workspace
+          include-hidden-files: true
+          path: |
+            .
+            !.git
+            !.github
+            !.venv/**/!(*.py)
+  verify:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        task: [lint, test]
+        include:
+          - task: lint
+            command: make lint
+          - task: test
+            command: make test
+    name: ${{ matrix.task }}
+    steps:
+      - name: Download workspace
+        uses: actions/download-artifact@v4
+        with:
+          name: workspace
+      
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+      
+      - name: Install & configure poetry
+        run: |
+          python -m pip install poetry==1.4.2
+          python -m poetry config virtualenvs.in-project true
+      
+      - name: Cache poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: ./.venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      
+      - name: Install dependencies
+        run: python -m poetry install
+      
+      - name: Run ${{ matrix.task }}
+        run: python -m poetry run ${{ matrix.command }}
+
+  release:
+    needs: verify
+    runs-on: ubuntu-latest
+    concurrency: release
+    outputs:
+      released: ${{ steps.release.outputs.released }}
+    steps:
+      # Note: we need to checkout the repository at the workflow sha in case during the workflow
+      # the branch was updated. To keep PSR working with the configured release branches,
+      # we force a checkout of the desired release branch but at the workflow sha HEAD.
+      - name: Setup | Checkout Repository at workflow sha
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+
+      - name: Setup | Force correct release branch on workflow sha
+        run: |
+          git checkout -B ${{ github.ref_name }} ${{ github.sha }}
+
+      - name: Action | Semantic Version Release
+        id: release
+        # Adjust tag with desired version if applicable.
+        uses: python-semantic-release/python-semantic-release@v9.15.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          git_committer_name: "github-actions"
+          git_committer_email: "actions@users.noreply.github.com"
+
+      # Add PyPI publishing steps
+      - name: Build package
+        if: steps.release.outputs.released == 'true'
+        run: |
+          python -m pip install build
+          python -m build
+
+      - name: Publish to PyPI
+        if: steps.release.outputs.released == 'true'
+        uses: pypa/gh-action-pypi-publish@v1.8.14
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
